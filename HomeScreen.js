@@ -16,6 +16,7 @@ import {
     StatusBar,
     TextInput,
     Button,
+    Alert,
 } from 'react-native';
 
 import {
@@ -37,14 +38,15 @@ class HomeScreen extends React.Component {
         }
     }
 
-    getAsteroidData = () => {
-        fetch('https://api.nasa.gov/neo/rest/v1/neo/' + this.state.asteroid_id + '?api_key=' + api_key)
+    getAsteroidData = (asteroid_id) => {
+        fetch('https://api.nasa.gov/neo/rest/v1/neo/' + asteroid_id + '?api_key=' + api_key)
             .then(res => res.json())
             .then(response => {
                 console.log("Name : " + response.name)
                 this.props.navigation.navigate('Detail', { api_data: response })
             }).catch((error) => {
-                console.log(error)
+                console.log(error);
+                Alert.alert("","No Data Found");
             })
     }
 
@@ -56,9 +58,7 @@ class HomeScreen extends React.Component {
                 var page_size = response.page.size;
                 var random_index = Math.floor(Math.random() * Math.floor(page_size - 1));
                 console.log(random_index);
-                this.setState({
-                    asteroid_id: response.near_earth_objects[random_index].id
-                }, () => this.getAsteroidData())
+                 this.getAsteroidData(response.near_earth_objects[random_index].id)
             }).catch((error) => {
                 console.log(error)
             })
@@ -79,9 +79,10 @@ class HomeScreen extends React.Component {
 
                 <TouchableOpacity
                     style={styles.obj_style}
+                    disabled={this.state.asteroid_id.trim() === ""?true:false}
                     onPress={() => {
                         if (this.state.asteroid_id.trim() !== "") {
-                            this.getAsteroidData()
+                            this.getAsteroidData(this.state.asteroid_id)
                         }
                     }}
                 >
